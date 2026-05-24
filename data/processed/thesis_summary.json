@@ -1,0 +1,15 @@
+{
+  "models_compared": 12,
+  "best_classical_model": "SimpleAvg_trees",
+  "best_ml_model": "XGBoost",
+  "best_ensemble": "STACK_Ridge_trees",
+  "category_fairness_cv": 26.81,
+  "state_fairness_cv": 19.79,
+  "top_5_shap_features": [
+    "rolling_mean_7",
+    "rolling_mean_28",
+    "item_month_mean",
+    "rolling_std_7",
+    "item_dow_mean"
+  ]
+}

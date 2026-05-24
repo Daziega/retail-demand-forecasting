@@ -1,0 +1,7 @@
+Model,RMSE
+Moving Average,1.712217
+Exponential Smoothing,1.66829
+ARIMA,1.666843
+Random Forest,1.108203
+XGBoost,1.100831
+LightGBM,1.104077
