@@ -1,0 +1,7 @@
+kpi,value,model
+Best classical MAE,0.970,SimpleAvg_trees
+Best ensemble MAE,0.952,STACK_Ridge_trees
+MAE improvement %,1.8%,ensemble vs classical
+Inventory cost reduction %,-1.5%,"L=14, SL=95%, stockout 1.0x"
+Number of SKU-store series,502,stratified subsample
+Test window,2016-03-01 to 2016-04-24,

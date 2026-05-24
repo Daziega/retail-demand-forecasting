@@ -1,8 +1,31 @@
+# Virtual environments
 venv/
 .venv/
+retail_forecasting_env/
+
+# Python
 __pycache__/
+*.pyc
+*.pyo
 .ipynb_checkpoints/
-data/raw/
-models/
-.env
+
+# OS / editor
 .DS_Store
+*.swp
+~$*
+
+# Secrets
+.env
+
+# Data inputs (raw Kaggle dataset — not redistributed)
+data/raw/
+
+# Trained models (artefacts, not source)
+models/
+
+# Large intermediate artefacts (regeneratable from notebooks)
+artifacts/
+
+# Large preprocessing outputs (regeneratable; the 10MB stratified subsample IS committed)
+data/processed/feature_engineered_data.parquet
+data/processed/preprocessed_data.parquet
