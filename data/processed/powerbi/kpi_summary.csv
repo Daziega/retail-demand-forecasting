@@ -1,7 +1,12 @@
 kpi,value,model
-Best classical MAE,0.970,SimpleAvg_trees
+Best classical MAE,0.997,AutoARIMA
 Best ensemble MAE,0.952,STACK_Ridge_trees
-MAE improvement %,1.8%,ensemble vs classical
-Inventory cost reduction %,-1.5%,"L=14, SL=95%, stockout 1.0x"
+MAE improvement vs classical,4.5%,Ensemble vs AutoARIMA
+Realised SL (Classical),100.0%,"L=14, simulated test window"
+Realised SL (ML-Gaussian),100.0%,"L=14, simulated"
+Realised SL (ML-Quantile),100.0%,"L=14, simulated"
+Cost change ML-Quant vs Cls,-1.5%,"L=14, m=1.0, simulated"
+Cost change ML-Gaus vs Cls,+0.0%,"L=14, m=1.0, simulated"
+Stockouts under baseline,0 units,across all 502 series
 Number of SKU-store series,502,stratified subsample
-Test window,2016-03-01 to 2016-04-24,
+Test window,2016-03-01 to 2016-04-24,56 days

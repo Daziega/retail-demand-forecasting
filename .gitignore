@@ -9,10 +9,16 @@ __pycache__/
 *.pyo
 .ipynb_checkpoints/
 
+# Node
+node_modules/
+
 # OS / editor
 .DS_Store
 *.swp
 ~$*
+
+# Editing backups (intermediate snapshots, not deliverables)
+*.docx.bak*
 
 # Secrets
 .env
