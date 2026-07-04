@@ -1,0 +1,23 @@
+====================================================================================================
+FALSIFICATION TESTS — Engine validation for Chapter 5 §5.3
+502 series | L = 14 d | target SL = 95% | m = 1.0 | total test demand = 35,734 units
+====================================================================================================
+Real buffers (baseline)                     realised SL = 100.0%   stockout cost SC = $          0   unmet units =         0   total $     63,587
+Safety stock set to zero                    realised SL =  74.0%   stockout cost SC = $    124,338   unmet units =     9,306   total $    337,986  Δ vs baseline TC: +274,398
+Realised demand scaled x3                   realised SL =  94.1%   stockout cost SC = $     87,691   unmet units =     6,328   total $    154,905  Δ vs baseline TC: +91,317
+Replenishment suppressed (L extended)       realised SL =   0.0%   stockout cost SC = $    469,556   unmet units =    35,734   total $    469,556  Δ vs baseline TC: +405,968
+
+====================================================================================================
+PER-POLICY VIEW under demand x3 stress
+====================================================================================================
+  CLASSICAL               realised SL =  94.1%   SC = $    87,691   unmet =    6,328   TC = $    154,905
+  ML_GAUSSIAN             realised SL =  94.0%   SC = $    88,447   unmet =    6,418   TC = $    155,659
+  ML_EMP_QUANTILE         realised SL =  94.1%   SC = $    86,629   unmet =    6,322   TC = $    154,832
+
+  ML-Quantile vs Classical: +0.0%
+  ML-Gaussian vs Classical: -0.5%
+
+If the x3 stress flips the comparison toward the quantile policy, that is the regime
+the §5.6 boundary-condition argument predicts. If it does not, the boundary is even
+further out than x3, which itself is a defensible finding.
+====================================================================================================
