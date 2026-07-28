@@ -1,52 +1,96 @@
 """
-Forward inventory simulation for the (R, s, S) Order-Up-To-Level policy.
+Forward simulation of the (R, s, S) Order-Up-To-Level inventory policy.
 
-PURPOSE
--------
+A pre-investment diagnostic: it answers, from your own sales history, the one
+question that determines whether better demand forecasting is worth paying for.
+
+    Under our current replenishment policy, how often do we ACTUALLY run out
+    of stock, and what does it actually cost us?
+
+If the answer is "rarely, and not much", a more accurate forecast has no
+stockout cost left to remove and the investment is unlikely to pay for itself.
+If the answer is "often, and expensively", you are in the regime where better
+forecasting and distribution-aware safety stock demonstrably help.
+
+WHAT IT DOES
+------------
+Runs each policy forward day by day over a real demand window and COUNTS what
+happens: units of demand left unmet, inventory actually carried, orders
+actually placed. Service level is a measured OUTCOME, never an assumed input.
+
+Mechanics: lost-sales model (unmet demand is lost, not backordered); stock
+reviewed every R days; when the inventory position falls to or below the
+reorder point s, an order is placed up to level S; order quantity is sized by
+EOQ; deliveries arrive after lead time L.
+
+USAGE
+-----
+    python src/inventory_simulation.py --demo     # synthetic data, no setup
+    python src/inventory_simulation.py            # real pipeline artefacts
+
+Run from the repository root (paths below are relative to it).
+
+  --demo   Generates 502 synthetic intermittent series matching the shape of
+           M5 SKU-daily demand (zero-inflated, right-skewed). Needs nothing
+           but numpy. Writes data/processed/simulation_results_demo.csv.
+
+  default  Reads the trained-pipeline artefacts (artifacts/*.parquet, produced
+           by notebooks 04-09) and writes the full lead-time x stockout-
+           multiplier grid to data/processed/simulation_results.csv.
+
+Either way it prints a central case, plus sensitivity to the stockout-cost
+multiplier m and to lead time L.
+
+THE THREE POLICIES
+------------------
+All three share an identical level forecast and differ ONLY in how safety
+stock is computed, which isolates the effect of the safety-stock formulation:
+
+  1. CLASSICAL        Gaussian SS from classical-forecast residual sigma
+  2. ML_GAUSSIAN      Gaussian SS from ML-forecast residual sigma
+  3. ML_EMP_QUANTILE  SS from the empirical (q95 - q50) quantile spread
+
+The Gaussian formula assumes symmetric, bell-shaped forecast errors.
+Intermittent retail demand violates that assumption: it is right-skewed with
+a heavy upper tail. Policy 3 reads the buffer off the observed distribution
+instead, making no shape assumption.
+
+USING YOUR OWN DATA
+-------------------
+Write a loader returning a list of `Series` and call it in place of
+`load_real_dataset()`. Per product-store series you need:
+
+  - test_demand      actual daily units over the evaluation window (required)
+  - level_forecast   mean daily demand forecast d_bar
+  - sigma_classical  std. dev. of your CURRENT method's forecast residuals
+  - sigma_ml         std. dev. of the ML forecast's residuals
+  - q50, q95         median and 95th-percentile daily demand
+  - price            unit selling price
+  - train_demand     historical daily units (not used by the simulation
+                     itself, which never refits; kept for convenience)
+
+Economic assumptions (carrying rate, ordering cost, gross margin, review
+period, target service level) are module-level constants immediately below —
+change them to match your operation.
+
+WHY THIS EXISTS
+---------------
 An earlier draft of this research reported a ~21% annual cost reduction for
-the ML-Empirical-Quantile policy over the Classical baseline. That figure was
-NOT simulated: the achieved service level of each policy was *assigned*
-analytically (Gaussian -> ~83%, Quantile -> ~95% "by calibration") and then
-plugged into  SC = (target_SL - achieved_SL) * D * unit_cost * m.
-Because the service levels were inputs rather than measured outcomes, the
-quantile policy won by construction, before any demand was ever simulated.
+the quantile policy. That figure was never simulated: each policy's achieved
+service level was ASSIGNED analytically (Gaussian -> ~83%, quantile -> ~95%
+"by calibration") and substituted into
 
-This script replaces that assumption with a real experiment: it runs each
-(R, s, S) policy forward day-by-day over the test window using the ACTUAL
-observed demand, and COUNTS realized stockout units and realized on-hand
-inventory. Costs are computed from what actually happened, not from an
-assumed service-level gap.
+    SC = (target_SL - achieved_SL) * D * unit_cost * m
 
-WHAT IT FOUND
--------------
-On the M5 test window all three policies achieve a 100% realized service
-level — no policy ever stocks out — so there is no stockout cost for a better
-forecast or a smarter safety-stock formula to remove. The 21% saving does not
-survive measurement. Chapter 5 of the thesis reports this instead as a
-boundary condition: the quantile buffer only pays for itself when the baseline
-policy is genuinely exposed to stockout risk. Run falsification_tests.py to
-see the engine correctly detect stockouts once that exposure is introduced.
+Because service level was an input rather than a measurement, the quantile
+policy won by construction before any demand was simulated. Measuring it
+instead reverses the result: on the M5 test window all three policies achieve
+100% realized service, so no stockout cost exists for a better buffer to
+remove, and the quantile policy's larger buffer costs ~1.5% MORE.
 
-The three policies compared (identical level forecast; they differ ONLY in
-how safety stock is computed, so the comparison isolates the SS formulation):
-
-  1. CLASSICAL          : Gaussian SS from classical-forecast residual sigma
-  2. ML_GAUSSIAN        : Gaussian SS from ML-forecast residual sigma
-  3. ML_EMP_QUANTILE    : SS from the empirical (q95 - q50) quantile spread
-
-HOW THE STUDENTS PLUG IN REAL DATA
-----------------------------------
-Replace `build_demo_dataset()` with `load_real_dataset()` (a stub is
-provided at the bottom). Each series needs, from the existing Python pipeline:
-  - train_demand : 1D array of historical daily units (for fitting forecasts)
-  - test_demand  : 1D array of actual daily units over the test window
-  - level_forecast      : mean daily demand forecast d_bar (ensemble)
-  - sigma_classical     : std of Croston-SBA residuals on validation
-  - sigma_ml            : std of ensemble residuals on validation
-  - q50, q95            : LightGBM quantile predictions (median, P95)
-  - price               : unit selling price
-
-Author: prepared for the TFM supervision (Demand Forecasting Using ML)
+That is the case for measuring rather than assuming, and the reason this
+engine is published alongside the findings. See falsification_tests.py for
+the stress tests confirming it does detect stockouts when they occur.
 """
 
 import numpy as np
