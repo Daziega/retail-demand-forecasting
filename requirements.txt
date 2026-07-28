@@ -1,12 +1,36 @@
-pandas
-numpy
-matplotlib
-seaborn
-scikit-learn
-statsmodels
-lightgbm
-xgboost
-plotly
-streamlit
-jupyter
-joblib
+# Retail Demand Forecasting & Inventory Optimisation
+# Pinned to the exact versions used for the reported results (thesis Table A.1).
+# Target interpreter: Python 3.11 — CPU only, no GPU required.
+#
+#   python3.11 -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt
+
+# --- Core data handling ---
+pandas==2.2.3
+numpy==1.26.4
+pyarrow==17.0.0
+
+# --- Forecasting models ---
+scikit-learn==1.5.2      # Random Forest, Ridge meta-learner, split utilities
+lightgbm==4.5.0          # Tier 2 gradient boosting + Tier 5 quantile regression
+xgboost==2.1.2           # Tier 2 gradient boosting (Tweedie loss)
+tensorflow==2.16.2       # Tier 3 LSTM via the Keras API
+statsforecast==1.7.6     # Tier 1 classical baselines (Croston, Croston-SBA, AutoARIMA)
+statsmodels==0.14.2      # Legacy ARIMA cross-checks
+
+# --- Interpretability ---
+shap==0.46.0             # Feature attribution (§3.10, §4.11)
+
+# --- Visualisation ---
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# --- Utilities ---
+joblib==1.4.2            # Model serialisation
+jupyter==1.1.1           # Notebook execution
+
+# NOTE: the inventory simulation engine (src/inventory_simulation.py) depends
+# only on numpy + pandas, so it can be run in a minimal environment.
+#
+# The thesis document build scripts in archive/thesis-build/ additionally
+# require python-docx==1.1.2. They are not needed to reproduce any result.
